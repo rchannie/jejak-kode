@@ -1,0 +1,18 @@
+# Blueprint Render: satu web service gratis yang menjalankan Dockerfile di folder ini.
+# Basis data memakai PostgreSQL dari Neon (gratis), alamatnya diisi di DATABASE_URL.
+# Panduan lengkap: DEPLOY.md
+services:
+  - type: web
+    name: jejak-kode
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/kesehatan
+    autoDeployTrigger: commit
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: KODE_DAFTAR_GURU
+        sync: false

@@ -1,0 +1,9 @@
+**/node_modules
+frontend/dist
+frontend/dist-artifact
+artifact
+**/__pycache__
+**/.pytest_cache
+**/*.db
+backend/.env
+.git

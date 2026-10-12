@@ -4,3 +4,4 @@ dist-artifact/
 *.db
 __pycache__/
 .pytest_cache/
+backend/.env

@@ -3,11 +3,12 @@ import WorldCanvas from '../components/WorldCanvas.jsx';
 import { Sprite } from '../components/Kecil.jsx';
 import { BAB, FASE, LEVEL, TOKOH } from '../game/levels.js';
 import { buatDunia } from '../engine/dunia.js';
-import { mulaiLevel, useToko } from '../data/store.js';
+import { mulaiLevel, namaPemain, useToko } from '../data/store.js';
 
 export default function PetaLevel() {
-  const siswa = useToko((s) => s.siswa[s.siswaId]);
-  const progres = siswa ? siswa.progres : {};
+  const nama = useToko((s) => namaPemain(s));
+  const mode = useToko((s) => s.mode);
+  const progres = useToko((s) => s.progres);
   const selesai = LEVEL.filter((l) => progres[l.id] && progres[l.id].selesai).length;
   const pratinjau = useMemo(() => Object.fromEntries(
     LEVEL.map((l) => [l.id, buatDunia(l.percobaan.peta, l.perintah).salin()]),
@@ -18,8 +19,12 @@ export default function PetaLevel() {
       <header className="peta-kepala bingkai-kertas">
         <Sprite nama="bit_senang" ukuran={64} className="peta-bit" />
         <div>
-          <h1>Halo, {siswa ? siswa.nama.split(' ')[0] : 'teman'}!</h1>
-          <p>Pilih tempat di sekolah yang mau kamu bantu hari ini. Mulailah dari bab Dasar, lalu lanjut ke Percabangan dan Perulangan (level 1 sampai {LEVEL.length}).</p>
+          <h1>Halo, {nama ? nama.split(' ')[0] : 'teman'}!</h1>
+          <p>
+            {mode === 'pratinjau'
+              ? 'Mode coba guru: Anda bisa memainkan semua level seperti siswa. Progres di mode ini tidak disimpan dan tidak muncul di dasbor.'
+              : `Pilih tempat di sekolah yang mau kamu bantu hari ini. Mulailah dari bab Dasar, lalu lanjut ke Percabangan dan Perulangan (level 1 sampai ${LEVEL.length}).`}
+          </p>
         </div>
         <div className="peta-bintang" aria-label={`${selesai} dari ${LEVEL.length} level selesai`}>
           {LEVEL.map((l) => (

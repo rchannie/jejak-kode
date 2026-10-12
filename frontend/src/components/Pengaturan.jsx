@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Sprite } from './Kecil.jsx';
 import { INFO_LAGU, setMusik, setVolume, useMusik } from '../data/musik.js';
+import { useToko } from '../data/store.js';
+import { FormGantiSandi } from './Akun.jsx';
 
 // Tombol musik di bilah atas: sekali klik untuk menyalakan atau mematikan lagu.
 export function TombolMusik() {
@@ -46,6 +48,8 @@ export function TombolPengaturan() {
 
 function PanelPengaturan({ tutup }) {
   const m = useMusik();
+  const akun = useToko((s) => s.akun);
+  const [gantiSandi, setGantiSandi] = useState(false);
   const panel = useRef(null);
   const refTutup = useRef(tutup);
   refTutup.current = tutup;
@@ -115,6 +119,17 @@ function PanelPengaturan({ tutup }) {
           </div>
           <p className="atur-ket" aria-live="polite">{keterangan}</p>
         </section>
+
+        {akun ? (
+          <section className="atur-bagian" aria-labelledby="judul-akun">
+            <h3 id="judul-akun">Akun</h3>
+            <div className="atur-baris">
+              <span>{akun.nama} <small className="label-kecil">({akun.username})</small></span>
+              {!gantiSandi ? <button type="button" className="tombol kecil krem" onClick={() => setGantiSandi(true)}>Ganti kata sandi</button> : null}
+            </div>
+            {gantiSandi ? <FormGantiSandi /> : null}
+          </section>
+        ) : null}
 
         <div className="panel-atur-kaki">
           <button type="button" className="tombol" onClick={tutup}>Selesai</button>

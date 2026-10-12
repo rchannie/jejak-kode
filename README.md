@@ -42,10 +42,10 @@ konsep) dan mengikuti lima fase guided inquiry menurut Pedaste dkk. (2015):
 | Fase | Yang dilakukan siswa di dalam game | Peran guru |
 |---|---|---|
 | 1. Orientasi | Membaca cerita tokoh sekolah dan misi level | Membuka pembelajaran |
-| 2. Konseptualisasi | Menebak hasil kode C sebelum dijalankan (tombol jalankan dikunci) | Memantau tebakan di dasbor |
-| 3. Investigasi | Menjalankan kode langkah demi langkah, mengubah nilai, mengamati panel eksekusi | Memberi pertanyaan pancingan |
+| 2. Konseptualisasi | Menebak hasil kode C sebelum dijalankan (tombol jalankan dikunci) dan menulis alasannya di LKPD | Memantau tebakan di dasbor |
+| 3. Investigasi | Menjalankan kode langkah demi langkah, mengubah nilai, mengamati panel eksekusi, lalu menjawab pertanyaan pengamatan di LKPD | Memberi pertanyaan pancingan |
 | 4. Kesimpulan | Membandingkan tebakan dengan hasil, memperbaiki kode, menulis kode sendiri dari awal, lalu merumuskan aturan | Memeriksa temuan dan kode siswa di dasbor |
-| 5. Diskusi | Mengirim temuan ke guru dan menyiapkan jawaban refleksi | Memimpin refleksi kelas |
+| 5. Diskusi | Menjawab pertanyaan refleksi di LKPD lalu mengirim LKPD ke guru | Memimpin refleksi kelas |
 
 Fase kesimpulan terdiri dari empat tahap:
 
@@ -78,6 +78,64 @@ Catatan eksekusi muncul saat kode bisa dijalankan. Di fase orientasi dan menebak
 tempatnya dipakai untuk dunia game yang lebih besar. Saat fase kesimpulan tahap
 **Bandingkan tebakan**, dunia game dan catatan eksekusi langsung menampilkan hasil
 akhir kode percobaan beserta semua langkahnya.
+
+## Akun guru dan siswa
+
+- **Siswa** mendaftar sendiri di halaman awal (tab **Daftar siswa**) dengan nama,
+  username, kata sandi, dan **kode kelas** dari guru. Progres dan LKPD tersimpan di
+  server, jadi siswa bisa melanjutkan dari komputer mana pun.
+- **Guru** hanya bisa mendaftar dengan **kode pendaftaran guru** dari pengelola
+  server (variabel `KODE_DAFTAR_GURU`), atau dibuatkan lewat `python kelola.py buat-guru`.
+  Siswa tidak bisa membuka dasbor guru, dan setiap guru hanya melihat kelasnya sendiri.
+- Guru membuat kelas di dasbor. Setiap kelas punya kode (misalnya `VEE-D7N`) yang bisa
+  ditampilkan besar di proyektor, diganti, dan pendaftarannya bisa dibuka atau ditutup.
+- Siswa yang lupa kata sandi di-reset oleh guru. Siswa mendapat kata sandi sementara
+  dan langsung diminta membuat kata sandi baru.
+- Guru bisa menekan **Coba game** untuk memainkan semua level tanpa menyimpan progres.
+- Jika server tidak terhubung (misalnya versi satu halaman), game tetap bisa dimainkan
+  sebagai tamu tanpa akun. Progres hanya tersimpan selama halaman terbuka.
+
+## LKPD (Lembar Kerja Peserta Didik)
+
+Setiap level punya satu LKPD yang disusun mengikuti lima fase guided inquiry. LKPD
+terisi otomatis dari jawaban siswa selama bermain, jadi siswa tidak mengerjakan
+lembar terpisah:
+
+| Bagian LKPD | Diisi di fase | Isi |
+|---|---|---|
+| Tujuan dan petunjuk | Orientasi | Misi level dan indikator computational thinking |
+| 1. Membuat dugaan | Konseptualisasi | Pilihan tebakan dan **alasan** (wajib, minimal 3 kata) |
+| 2. Mengamati eksekusi kode | Investigasi | Jawaban **tiga pertanyaan pengamatan**, ditampilkan satu per satu (wajib, minimal 2 kata) |
+| 3. Kesimpulan | Kesimpulan | Kesesuaian dugaan, hasil misi perbaikan, kode tulisan sendiri, aturan yang dipilih, dan temuan dengan kalimat sendiri |
+| 4. Refleksi | Diskusi | Jawaban **pertanyaan refleksi** untuk diskusi kelas (wajib, minimal 3 kata) |
+
+- Siswa bisa membuka LKPD level yang sedang dimainkan lewat tombol **LKPD** di samping
+  tahapan fase, lalu mencetaknya atau menyimpannya sebagai PDF.
+- Guru membaca LKPD setiap siswa di dasbor (tab **LKPD** atau profil siswa), mencetak
+  LKPD satu siswa atau semua siswa per level, dan mencetak **LKPD kosong** sebagai
+  cadangan jika kelas tidak memakai komputer. Hasil cetak berukuran A4 dengan kolom
+  catatan dan paraf guru.
+
+## Dasbor guru
+
+- **Panel kelas**: kode kelas, jumlah siswa terdaftar, siswa yang aktif sekarang,
+  rata-rata level selesai, dan jumlah siswa yang perlu didampingi.
+- **Ringkasan kelas**: daftar siswa yang perlu didampingi beserta alasannya (misi
+  perbaikan gagal berkali-kali, kode tulisan sendiri gagal, salah merumuskan aturan,
+  sering mendapat galat kode, atau terlalu lama di satu fase), lalu kartu per level:
+  jumlah selesai, tebakan yang sesuai, rata-rata waktu, tingkat bantuan (mandiri,
+  dengan petunjuk, dengan kerangka atau sublevel), tebakan keliru terbanyak, dan
+  galat kode yang paling sering muncul.
+- **Siswa**: tabel semua siswa dengan status setiap level, waktu belajar, dan
+  aktivitas terakhir. Profil siswa berisi waktu aktif di setiap fase, galat kode
+  terakhir (baris, pesan, dan waktunya), jumlah menjalankan kode dan menekan
+  Langkah, petunjuk yang dibuka, kode yang ditulis, LKPD, serta tombol reset kata
+  sandi, ubah nama, pindah kelas, dan hapus akun.
+- **Unduh data (CSV)**: satu baris per siswa per level berisi semua angka di atas
+  dan isi LKPD, untuk diolah di Excel atau Google Sheets (pemisah titik koma).
+
+Waktu belajar yang dicatat hanya waktu aktif: tab game terlihat dan ada gerakan
+mouse atau ketikan dalam 2 menit terakhir.
 
 ## Tata letak layar bermain
 
@@ -140,41 +198,28 @@ lima fase berada dalam satu baris. Di bawahnya ada tiga kolom:
 ## Teknologi
 
 - Frontend: React 18 + Vite (folder `frontend`)
-- Backend: FastAPI + SQLite (folder `backend`)
+- Backend: FastAPI + SQLAlchemy, dengan SQLite (server lokal) atau PostgreSQL (online)
+  (folder `backend`)
 - Aset: sprite pixel art buatan sendiri (folder `frontend/src/assets/sprites`)
 
-## Cara menjalankan
+## Cara menjalankan dan deploy
 
-Kebutuhan: Node.js 18 ke atas dan Python 3.10 ke atas.
+Panduan lengkap ada di **[DEPLOY.md](DEPLOY.md)**:
 
-### Mode pengembangan (dua terminal)
+- **Online gratis** dengan Render (server) dan Neon (basis data PostgreSQL).
+- **Server di laptop guru** untuk lab sekolah tanpa internet (SQLite).
+- **Mode pengembangan** dengan dua terminal.
 
-```bash
-# terminal 1: backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-
-# terminal 2: frontend
-cd frontend
-npm install
-npm run dev
-```
-
-Buka http://localhost:5173. Permintaan ke `/api` otomatis diteruskan ke backend.
-
-### Mode lab sekolah (satu server)
+Ringkasnya, untuk mencoba di komputer sendiri:
 
 ```bash
 cd frontend && npm install && npm run build
-cd ../backend && uvicorn main:app --host 0.0.0.0 --port 8000
+cd ../backend && pip install -r requirements.txt
+copy env.contoh .env        # isi KODE_DAFTAR_GURU
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-Siswa membuka `http://<alamat-ip-komputer-guru>:8000` dari komputer masing-masing.
-Guru membuka alamat yang sama lalu menekan **Dasbor guru**.
-
-Tanpa backend, game tetap bisa dimainkan. Data hanya tersimpan selama halaman
-terbuka (tanda **Lokal** di pojok kanan atas).
+Lalu buka http://localhost:8000.
 
 ### Versi satu halaman
 
@@ -203,9 +248,19 @@ frontend/
   public/musik/               file lagu
   src/screens/                layar mulai, peta sekolah, bermain, dasbor guru
   tests/uji_engine.mjs        uji otomatis interpreter dan semua level
+  src/data/store.js           keadaan game, akun, dan penyimpanan progres ke server
+  src/components/Akun.jsx     form akun (ganti kata sandi, masuk lagi saat sesi habis)
+  src/components/LembarKerja.jsx  LKPD per level (tampil, cetak, LKPD kosong)
+  src/screens/dasbor/         bagian dasbor guru: ringkasan, siswa, LKPD, olah data dan CSV
 backend/
-  main.py                     API: /api/siswa, /api/progres, /api/dasbor
-  test_api.py                 uji API
+  main.py                     API akun, kelas, progres, dan dasbor guru
+  basisdata.py                tabel dan koneksi (SQLite atau PostgreSQL lewat DATABASE_URL)
+  keamanan.py                 hash kata sandi, token sesi, kode kelas, pembatas percobaan
+  kelola.py                   perintah terminal: buat akun guru, reset sandi, daftar akun
+  env.contoh                  contoh pengaturan server (salin menjadi .env)
+  test_api.py                 uji API (bisa dijalankan dengan SQLite atau PostgreSQL)
+Dockerfile, render.yaml       paket deploy untuk Render
+DEPLOY.md                     panduan deploy
 tools/
   buat_aset.py                pembuat sprite dan bingkai UI pixel art
   pratinjau_aset.png          pratinjau semua sprite
@@ -220,10 +275,9 @@ tools/
   `npm run uji` untuk memastikan kunci tebakan, kode rusak, solusi perbaikan, dan
   solusi tulis sendiri sudah sesuai. Bila misi tulis sendiri memakai peta variasi,
   `saranVarian` bisa diisi pesan saran khusus saat kode gagal di peta variasi.
-- **Nomor level di database**: level bab Dasar ditambahkan di depan, sehingga level
-  lama L1 sampai L4 sekarang bernomor L3 sampai L6. Saat backend dijalankan pertama
-  kali, progres yang tersimpan dengan nomor lama dipindahkan otomatis satu kali
-  (dicatat di tabel `meta`).
+- **Data uji coba versi lama**: tabel `siswa` dan `progres` dari versi tanpa akun
+  tidak dipakai lagi. Data baru disimpan di tabel `pengguna`, `kelas`, `sesi`, dan
+  `progres_level`.
 - **Mengganti gambar**: timpa file PNG di `frontend/src/assets/sprites` dengan nama
   dan ukuran yang sama, atau ubah gambar di `tools/buat_aset.py` lalu jalankan
   `python tools/buat_aset.py`.
@@ -257,5 +311,4 @@ menunjuk nomor baris, misalnya "Kurang titik koma (;) di akhir perintah."
 
 - Bahasa C di dalam game adalah subset untuk pemula (belum ada array, pointer,
   fungsi buatan sendiri, dan `scanf`).
-- Data dasbor belum memakai akun guru. Untuk uji coba di kelas, jalankan backend
-  di jaringan lokal sekolah.
+- Satu akun guru bisa punya banyak kelas, tetapi satu kelas hanya dikelola satu guru.
