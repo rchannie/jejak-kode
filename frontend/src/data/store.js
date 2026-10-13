@@ -52,6 +52,8 @@ export function progresBaru() {
 let state = {
   layar: 'mulai', // mulai | level | main | dasbor | ganti-sandi
   server: TANPA_API ? false : null, // null = sedang diperiksa
+  bangun: false, // server belum menjawab, sedang dicoba lagi (misalnya Railway baru bangun dari tidur)
+  gagalTerhubung: false, // server tidak bisa dihubungi setelah beberapa kali dicoba
   info: { daftarGuru: false },
   akun: null, // { id, username, nama, peran, kelas, harusGantiSandi }
   mode: null, // 'siswa' | 'tamu' | 'pratinjau'
@@ -104,13 +106,30 @@ export async function api(jalur, { metode = 'GET', isi } = {}) {
 }
 
 // Memeriksa server dan sesi saat aplikasi dibuka.
+// Server gratis (Railway, Render) tidur saat lama tidak dipakai. Permintaan
+// pertama membangunkannya dan bisa gagal (502/503/504) selama beberapa detik,
+// jadi pemeriksaan diulang sampai sekitar satu menit sebelum menyerah.
+// Jika jawabannya 404 atau bukan JSON, berarti memang tidak ada server API
+// (misalnya game dibuka dari hosting statis saja), jadi langsung mode tamu.
+const JEDA_COBA = [2000, 3000, 4000, 5000, 6000, 8000, 10000, 10000, 10000];
+const tidur = (ms) => new Promise((r) => { setTimeout(r, ms); });
+
 export async function mulaiAplikasi() {
   if (TANPA_API) return;
-  const sehat = await api('/kesehatan');
-  if (!sehat.ok) {
-    ubah((s) => ({ ...s, server: false }));
+  ubah((s) => ({ ...s, server: s.akun ? s.server : null, gagalTerhubung: false }));
+  let sehat = await api('/kesehatan');
+  for (let i = 0; i < JEDA_COBA.length && !(sehat.ok && sehat.data && sehat.data.status === 'ok'); i++) {
+    const tidakAdaApi = sehat.status === 404 || (sehat.ok && !(sehat.data && sehat.data.status));
+    if (tidakAdaApi) break;
+    ubah((s) => ({ ...s, bangun: true }));
+    await tidur(JEDA_COBA[i]);
+    sehat = await api('/kesehatan');
+  }
+  if (!(sehat.ok && sehat.data && sehat.data.status === 'ok')) {
+    ubah((s) => ({ ...s, server: false, bangun: false, gagalTerhubung: sehat.status !== 404 }));
     return;
   }
+  ubah((s) => ({ ...s, bangun: false }));
   const info = await api('/info');
   ubah((s) => ({ ...s, server: true, info: info.ok ? info.data : s.info }));
   if (state.akun) return;

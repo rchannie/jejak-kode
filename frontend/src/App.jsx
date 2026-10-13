@@ -87,11 +87,17 @@ export default function App() {
 }
 
 function MemeriksaServer() {
+  const bangun = useToko((s) => s.bangun);
   return (
     <div className="layar-tengah">
       <div className="kartu-tengah bingkai-kertas" role="status">
         <Sprite nama="bit_1" ukuran={64} className="peta-bit" />
-        <p>Menghubungkan ke server sekolah...</p>
+        <p>{bangun ? 'Server sedang dinyalakan...' : 'Menghubungkan ke server...'}</p>
+        {bangun ? (
+          <p className="fase-catatan">
+            Server tidur kalau lama tidak dipakai. Biasanya siap dalam kurang dari satu menit, tidak perlu memuat ulang halaman.
+          </p>
+        ) : null}
       </div>
     </div>
   );

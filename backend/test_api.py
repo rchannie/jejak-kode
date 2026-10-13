@@ -24,7 +24,7 @@ def bersih():
     with main.mesin.begin() as con:
         for t in (bd.sesi, bd.progres_level, bd.kelas, bd.pengguna):
             con.execute(t.delete())
-    for p in (main.pembatas_masuk, main.pembatas_kode):
+    for p in (main.pembatas_masuk, main.pembatas_username, main.pembatas_kode):
         p._catatan.clear()
     yield
 
@@ -150,6 +150,22 @@ def test_masuk_salah_dan_dibatasi():
     for _ in range(8):
         k.post('/api/akun/masuk', json={'username': 'bu.sari', 'sandi': 'salah'})
     assert k.post('/api/akun/masuk', json={'username': 'bu.sari', 'sandi': 'rahasia123'}).status_code == 429
+
+
+def test_batas_username_walau_ip_berganti():
+    guru = klien()
+    daftar_guru(guru)
+    k = klien()
+    for i in range(20):
+        k.post('/api/akun/masuk', json={'username': 'bu.sari', 'sandi': 'salah'}, headers={'x-forwarded-for': f'10.0.0.{i}'})
+    r = k.post('/api/akun/masuk', json={'username': 'bu.sari', 'sandi': 'rahasia123'}, headers={'x-forwarded-for': '10.0.0.99'})
+    assert r.status_code == 429
+
+
+def test_jawaban_api_tidak_boleh_dicache():
+    r = klien().get('/api/info')
+    assert r.headers['cache-control'] == 'no-store'
+    assert r.headers['cdn-cache-control'] == 'no-store'
 
 
 def test_reset_dan_ganti_sandi():

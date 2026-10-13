@@ -2,7 +2,7 @@ import { useState } from 'react';
 import AdeganSekolah from '../components/AdeganSekolah.jsx';
 import { Isian, rapikanUsername } from '../components/Akun.jsx';
 import { FASE } from '../game/levels.js';
-import { daftarGuru, daftarSiswa, mainTamu, masuk, namaTersimpan, useToko } from '../data/store.js';
+import { daftarGuru, daftarSiswa, mainTamu, masuk, mulaiAplikasi, namaTersimpan, useToko } from '../data/store.js';
 
 export default function Mulai() {
   const server = useToko((s) => s.server);
@@ -182,6 +182,7 @@ function FormDaftarGuru() {
 
 // ------------------------------------------------------------------ tanpa server: main sebagai tamu
 function PanelTamu() {
+  const gagalTerhubung = useToko((s) => s.gagalTerhubung);
   const lama = namaTersimpan();
   const [nama, setNama] = useState(lama ? lama.nama : '');
   const [kelas, setKelas] = useState(lama ? lama.kelas : 'X PPLG 1');
@@ -191,10 +192,16 @@ function PanelTamu() {
       className="mulai-form bingkai-kertas"
       onSubmit={(e) => { e.preventDefault(); if (siap) mainTamu(nama.trim(), kelas.trim()); }}
     >
+      {gagalTerhubung ? (
+        <div className="vonis salah" role="alert">
+          <p>Server belum bisa dihubungi. Periksa koneksi internet, lalu coba lagi. Jika masih gagal, beri tahu guru.</p>
+          <button type="button" className="tombol kecil" onClick={mulaiAplikasi}>Coba hubungkan lagi</button>
+        </div>
+      ) : null}
       <h2>Main tanpa akun</h2>
       <p className="fase-catatan">
-        Server sekolah tidak terhubung, jadi akun, dasbor guru, dan penyimpanan progres tidak tersedia.
-        Progres hanya tersimpan selama halaman ini terbuka.
+        {gagalTerhubung ? 'Sambil menunggu, kamu bisa bermain tanpa akun. ' : 'Server sekolah tidak terhubung. '}
+        Akun, dasbor guru, dan penyimpanan progres tidak tersedia, dan progres hanya tersimpan selama halaman ini terbuka.
       </p>
       <Isian label="Nama" value={nama} onChange={(e) => setNama(e.target.value)} placeholder="Nama lengkap" autoComplete="name" />
       <Isian label="Kelas" value={kelas} onChange={(e) => setKelas(e.target.value)} placeholder="Contoh: X PPLG 1" />

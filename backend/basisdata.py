@@ -3,8 +3,8 @@
 Satu kode untuk dua jenis basis data:
 - SQLite (bawaan). Cocok untuk server di laptop guru atau lab sekolah.
   Datanya tersimpan di file backend/jejak_kode.db.
-- PostgreSQL. Dipakai saat di-deploy online (misalnya Render + Neon), karena
-  hosting gratis biasanya tidak menyimpan file secara permanen.
+- PostgreSQL. Dipakai saat di-deploy online (misalnya Railway + Supabase), karena
+  server di hosting tidak menyimpan file secara permanen.
 
 Pilihannya diatur lewat variabel lingkungan DATABASE_URL. Jika kosong,
 SQLite yang dipakai.
@@ -89,7 +89,7 @@ def url_database() -> str:
     if not url:
         jalur = Path(os.environ.get('JEJAK_DB', FOLDER / 'jejak_kode.db'))
         return f'sqlite:///{jalur}'
-    # Neon, Supabase, dan Render memberi alamat berawalan postgres:// atau
+    # Supabase, Neon, dan Railway memberi alamat berawalan postgres:// atau
     # postgresql://. SQLAlchemy perlu tahu driver yang dipakai (psycopg 3).
     for awalan in ('postgres://', 'postgresql://'):
         if url.startswith(awalan):
@@ -110,15 +110,30 @@ def buat_mesin(url: str | None = None) -> Engine:
 
         return mesin
     # prepare_threshold=None: tanpa prepared statement di server, supaya tetap aman
-    # saat memakai alamat Neon yang lewat connection pooler (PgBouncer).
-    return create_engine(
-        url, pool_pre_ping=True, pool_size=5, max_overflow=5, pool_recycle=300,
-        connect_args={'prepare_threshold': None},
-    )
+    # saat memakai connection pooler (Supabase Supavisor atau PgBouncer di Neon).
+    argumen = {'prepare_threshold': None}
+    # Di Railway, koneksi yang menganggur bisa membuat fitur Serverless (server tidur
+    # saat tidak dipakai) tidak pernah aktif. Jadi setiap permintaan membuka koneksi
+    # baru ke pooler Supabase. Atur DB_POOL=1 untuk tetap memakai kolam koneksi.
+    atur = os.environ.get('DB_POOL', '').strip()
+    if atur == '0' or (atur != '1' and os.environ.get('RAILWAY_ENVIRONMENT')):
+        from sqlalchemy.pool import NullPool
+        return create_engine(url, poolclass=NullPool, connect_args=argumen)
+    # Ukuran pool kecil supaya muat di batas koneksi pooler Supabase/Neon paket gratis.
+    return create_engine(url, pool_pre_ping=True, pool_size=4, max_overflow=4, pool_recycle=300, connect_args=argumen)
 
 
 def siapkan(mesin: Engine) -> None:
     metadata.create_all(mesin)
+    if mesin.dialect.name == 'postgresql':
+        # Supabase otomatis membuka tabel di skema public lewat Data API (REST)
+        # untuk siapa pun yang memegang anon key. Row Level Security tanpa policy
+        # menutup jalur itu. Server Jejak Kode tetap bisa membaca dan menulis
+        # karena terhubung sebagai pemilik tabel.
+        from sqlalchemy import text
+        with mesin.begin() as con:
+            for t in metadata.sorted_tables:
+                con.execute(text(f'ALTER TABLE {t.name} ENABLE ROW LEVEL SECURITY'))
 
 
 def insert_upsert(mesin: Engine):

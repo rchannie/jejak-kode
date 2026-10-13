@@ -71,18 +71,22 @@ BATAS_DATA_PROGRES = 200_000  # byte JSON per level
 mesin = bd.buat_mesin()
 bd.siapkan(mesin)
 
-# Hosting gratis seperti Render menghapus file setiap kali server dimulai ulang.
+# Hosting seperti Railway dan Render menghapus file setiap kali server dimulai ulang.
 # Tanpa DATABASE_URL, semua akun dan progres akan hilang, jadi beri peringatan jelas.
-if os.environ.get('RENDER') and mesin.dialect.name == 'sqlite':
-    print('PERINGATAN: DATABASE_URL belum diisi. Di Render, data SQLite hilang setiap server dimulai ulang. '
-          'Isi DATABASE_URL dengan alamat PostgreSQL dari Neon (lihat DEPLOY.md).', flush=True)
+if (os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('RENDER')) and mesin.dialect.name == 'sqlite':
+    print('PERINGATAN: DATABASE_URL belum diisi. Di hosting, data SQLite hilang setiap server dimulai ulang. '
+          'Isi DATABASE_URL dengan alamat PostgreSQL dari Supabase (lihat DEPLOY.md).', flush=True)
 
 app = FastAPI(title='Jejak Kode API', version='0.2.0')
 asal = [a.strip() for a in os.environ.get('ASAL_DIIZINKAN', 'http://localhost:5173,http://127.0.0.1:5173').split(',') if a.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=asal, allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
 
-pembatas_masuk = Pembatas(maks=8, detik=600)
-pembatas_kode = Pembatas(maks=15, detik=600)
+# Satu kelas biasanya keluar ke internet lewat satu IP sekolah yang sama, jadi
+# batas per IP dibuat longgar. Batas per username berlaku dari IP mana pun,
+# supaya tebakan kata sandi tetap tertahan walau IP-nya berganti-ganti.
+pembatas_masuk = Pembatas(maks=8, detik=600)       # per IP + username
+pembatas_username = Pembatas(maks=20, detik=600)   # per username
+pembatas_kode = Pembatas(maks=60, detik=600)       # per IP, salah kode kelas atau kode guru
 
 
 @app.middleware('http')
@@ -91,7 +95,10 @@ async def header_keamanan(request: Request, call_next):
     respons.headers.setdefault('X-Content-Type-Options', 'nosniff')
     respons.headers.setdefault('Referrer-Policy', 'same-origin')
     if request.url.path.startswith('/api/'):
-        respons.headers.setdefault('Cache-Control', 'no-store')
+        # Jawaban API berisi data akun. Jangan pernah disimpan cache, termasuk
+        # oleh CDN Vercel yang meneruskan /api ke server ini.
+        respons.headers['Cache-Control'] = 'no-store'
+        respons.headers['CDN-Cache-Control'] = 'no-store'
     return respons
 
 
@@ -275,7 +282,7 @@ def info():
 def masuk(isi: Masuk, request: Request, respons: Response):
     username = isi.username.strip().lower()
     kunci = f'{ip(request)}|{username}'
-    if pembatas_masuk.terkunci(kunci):
+    if pembatas_masuk.terkunci(kunci) or pembatas_username.terkunci(username):
         raise galat(429, 'Terlalu banyak percobaan masuk. Tunggu 10 menit, lalu coba lagi.')
     with mesin.begin() as con:
         p = con.execute(select(bd.pengguna).where(bd.pengguna.c.username == username)).mappings().first()
@@ -283,6 +290,7 @@ def masuk(isi: Masuk, request: Request, respons: Response):
             if not p:
                 cocok_sandi(isi.sandi, HASH_PALSU)
             pembatas_masuk.gagal(kunci)
+            pembatas_username.gagal(username)
             raise galat(401, 'Username atau kata sandi salah.')
         pembatas_masuk.reset(kunci)
         p = dict(p)

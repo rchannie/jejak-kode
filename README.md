@@ -198,15 +198,18 @@ lima fase berada dalam satu baris. Di bawahnya ada tiga kolom:
 ## Teknologi
 
 - Frontend: React 18 + Vite (folder `frontend`)
-- Backend: FastAPI + SQLAlchemy, dengan SQLite (server lokal) atau PostgreSQL (online)
-  (folder `backend`)
+- Backend: FastAPI + SQLAlchemy, dengan SQLite (server lokal) atau PostgreSQL di
+  Supabase (online) (folder `backend`)
+- Deploy: Vercel (game), Railway (server), Supabase (basis data)
 - Aset: sprite pixel art buatan sendiri (folder `frontend/src/assets/sprites`)
 
 ## Cara menjalankan dan deploy
 
 Panduan lengkap ada di **[DEPLOY.md](DEPLOY.md)**:
 
-- **Online gratis** dengan Render (server) dan Neon (basis data PostgreSQL).
+- **Online**, sama seperti FitLearn: game di **Vercel**, server FastAPI di **Railway**,
+  dan basis data PostgreSQL di **Supabase**. Vercel meneruskan `/api` ke Railway
+  (`frontend/vercel.json`), jadi siswa cukup membuka satu alamat.
 - **Server di laptop guru** untuk lab sekolah tanpa internet (SQLite).
 - **Mode pengembangan** dengan dua terminal.
 
@@ -259,8 +262,10 @@ backend/
   kelola.py                   perintah terminal: buat akun guru, reset sandi, daftar akun
   env.contoh                  contoh pengaturan server (salin menjadi .env)
   test_api.py                 uji API (bisa dijalankan dengan SQLite atau PostgreSQL)
-Dockerfile, render.yaml       paket deploy untuk Render
-DEPLOY.md                     panduan deploy
+frontend/vercel.json          pengaturan Vercel: meneruskan /api ke server di Railway
+backend/.python-version       versi Python untuk Railway
+DEPLOY.md                     panduan deploy (Vercel + Railway + Supabase, atau laptop guru)
+Dockerfile, render.yaml       alternatif deploy satu server (tidak dipakai di susunan Vercel)
 tools/
   buat_aset.py                pembuat sprite dan bingkai UI pixel art
   pratinjau_aset.png          pratinjau semua sprite

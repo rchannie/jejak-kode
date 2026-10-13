@@ -453,6 +453,7 @@ b, strong { font-weight: 400; color: var(--mint-tua); }
 .banding-kotak { display: grid; gap: 4px; align-content: start; padding: 8px 12px; background: #fff; box-shadow: 0 0 0 3px var(--plum); margin: 3px; }
 .banding-kotak h3 { font-size: 1rem; color: var(--pink-tua); }
 .vonis { padding: 8px 12px; margin: 3px; }
+div.vonis { display: grid; gap: 8px; justify-items: start; }
 .vonis.benar { background: var(--benar-muda); color: #1d5a2f; box-shadow: 0 0 0 3px var(--benar); }
 .vonis.salah { background: var(--salah-muda); color: #86222d; box-shadow: 0 0 0 3px var(--salah); }
 .penjelasan { max-width: 68ch; }
